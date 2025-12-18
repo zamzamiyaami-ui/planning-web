@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<!-- ================= FILE: index.html (INPUT + OUTPUT LANGSUNG) ================= -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistem Planning Otomatis</title>
+  <style>
+    body{font-family:Arial;background:#f4f6f8;padding:20px}
+    .box{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:8px}
+    label{display:block;margin-top:10px;font-weight:bold}
+    input,select,button{width:100%;padding:8px;margin-top:5px}
+    button{margin-top:15px;background:#007bff;color:#fff;border:none;cursor:pointer;border-radius:4px}
+    .output{margin-top:30px}
+    .day{background:#eef2f5;padding:15px;margin-bottom:15px;border-radius:8px}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Input Planning</h2>
+
+    <label>Hari</label>
+    <select id="hari">
+      <option>Senin</option><option>Selasa</option><option>Rabu</option>
+      <option>Kamis</option><option>Jumat</option><option>Sabtu</option><option>Minggu</option>
+    </select>
+
+    <label>Waktu</label>
+    <select id="waktu">
+      <option>Pagi</option><option>Siang</option><option>Sore</option><option>Malam</option>
+    </select>
+
+    <label>Kegiatan</label>
+    <input type="text" id="kegiatan" placeholder="Masukkan kegiatan">
+
+    <button onclick="simpan()">Simpan</button>
+    <button onclick="reset()" style="background:#dc3545">Reset</button>
+
+    <div class="output" id="areaCetak">
+      <h2>Output Planning</h2>
+      <div id="output"></div>
+    </div>
+
+    <button onclick="cetakJPG()" style="background:#28a745">Cetak JPG</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    const urutanHari=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+    const urutanWaktu=['Pagi','Siang','Sore','Malam'];
+    const data = JSON.parse(localStorage.getItem('planning')) || {};
+
+    function simpan(){
+      const h=hari.value;
+      const w=waktu.value;
+      const k=kegiatan.value;
+      if(!k) return alert('Kegiatan tidak boleh kosong');
+
+      if(!data[h]) data[h]={};
+      if(!data[h][w]) data[h][w]=[];
+
+      data[h][w].push(k);
+      localStorage.setItem('planning', JSON.stringify(data));
+      kegiatan.value='';
+      tampilkan();
+    }
+
+    function tampilkan(){
+      output.innerHTML='';
+      urutanHari.forEach(h=>{
+        if(data[h]){
+          const div=document.createElement('div');
+          div.className='day';
+          div.innerHTML=`<h3>${h}</h3>`;
+          urutanWaktu.forEach(w=>{
+            if(data[h][w]){
+              div.innerHTML+=`<strong>${w}</strong><ul>`+data[h][w].map(k=>`<li>${k}</li>`).join('')+'</ul>';
+            }
+          });
+          output.appendChild(div);
+        }
+      });
+    }
+
+    function reset(){
+      if(confirm('Reset semua planning?')){
+        localStorage.removeItem('planning');
+        location.reload();
+      }
+    }
+
+    function cetakJPG(){
+      html2canvas(document.getElementById('areaCetak')).then(canvas=>{
+        const a=document.createElement('a');
+        a.href=canvas.toDataURL('image/jpeg');
+        a.download='jadwal-mingguan.jpg';
+        a.click();
+      });
+    }
+
+    tampilkan();
+  </script>
+</body>
+</html>
+</body>
+ <data
