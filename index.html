@@ -1,13 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-<!-- ================= FILE: index.html (INPUT + OUTPUT LANGSUNG) ================= -->
-<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -20,6 +11,10 @@
     button{margin-top:15px;background:#007bff;color:#fff;border:none;cursor:pointer;border-radius:4px}
     .output{margin-top:30px}
     .day{background:#eef2f5;padding:15px;margin-bottom:15px;border-radius:8px}
+    .completed{text-decoration:line-through;color:#888} /* Styling untuk kegiatan yang selesai */
+    ul{list-style:none;padding:0} /* Hapus bullet default */
+    li{display:flex;align-items:center;margin-bottom:5px} /* Flexbox untuk checkbox dan teks */
+    input[type="checkbox"]{margin-right:10px} /* Spasi checkbox */
   </style>
 </head>
 <body>
@@ -57,16 +52,24 @@
     const urutanWaktu=['Pagi','Siang','Sore','Malam'];
     const data = JSON.parse(localStorage.getItem('planning')) || {};
 
+    // Tambahkan event listener untuk Enter pada input kegiatan
+    document.getElementById('kegiatan').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        simpan();
+      }
+    });
+
     function simpan(){
       const h=hari.value;
       const w=waktu.value;
-      const k=kegiatan.value;
+      const k=kegiatan.value.trim();
       if(!k) return alert('Kegiatan tidak boleh kosong');
 
       if(!data[h]) data[h]={};
       if(!data[h][w]) data[h][w]=[];
 
-      data[h][w].push(k);
+      // Ubah struktur data: dari string ke objek {text, completed}
+      data[h][w].push({text: k, completed: false});
       localStorage.setItem('planning', JSON.stringify(data));
       kegiatan.value='';
       tampilkan();
@@ -81,12 +84,28 @@
           div.innerHTML=`<h3>${h}</h3>`;
           urutanWaktu.forEach(w=>{
             if(data[h][w]){
-              div.innerHTML+=`<strong>${w}</strong><ul>`+data[h][w].map(k=>`<li>${k}</li>`).join('')+'</ul>';
+              div.innerHTML+=`<strong>${w}</strong><ul>`;
+              data[h][w].forEach((item, index) => {
+                const checked = item.completed ? 'checked' : '';
+                const classCompleted = item.completed ? 'completed' : '';
+                div.innerHTML += `<li>
+                  <input type="checkbox" ${checked} onchange="toggleCompleted('${h}', '${w}', ${index})">
+                  <span class="${classCompleted}">${item.text}</span>
+                </li>`;
+              });
+              div.innerHTML+='</ul>';
             }
           });
           output.appendChild(div);
         }
       });
+    }
+
+    // Fungsi untuk toggle status completed
+    function toggleCompleted(h, w, index) {
+      data[h][w][index].completed = !data[h][w][index].completed;
+      localStorage.setItem('planning', JSON.stringify(data));
+      tampilkan(); // Update tampilan setelah toggle
     }
 
     function reset(){
@@ -109,5 +128,7 @@
   </script>
 </body>
 </html>
+</html>
 </body>
  <data
+
